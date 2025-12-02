@@ -46,6 +46,24 @@ restore_file() {
 # For safety, we just append the snippet here if it's not present
 if grep -q "Claude Code Helper Functions" "$HOME/.zshrc"; then
     echo "✅ .zshrc already contains helper functions."
+    # 4. Apply Proxy Patches (Document Parsing Support)
+    echo "📦 Applying proxy enhancements..."
+    PROXY_DIR="$HOME/.claude-code-proxy"
+    PATCH_DIR="$ASSETS_DIR/proxy_patches"
+    
+    if [ -d "$PATCH_DIR" ] && [ -d "$PROXY_DIR" ]; then
+        cp -r "$PATCH_DIR/"* "$PROXY_DIR/"
+        echo "✅ Proxy patches applied."
+        
+        # Re-install dependencies to ensure new libs (pypdf etc.) are installed
+        echo "📦 Installing additional dependencies..."
+        pip3 install -r "$PROXY_DIR/requirements.txt" > /dev/null 2>&1
+        echo "✅ Dependencies updated."
+    else
+        echo "⚠️ Proxy directory or patches not found. Skipping patch application."
+    fi
+
+    echo "🎉 Restore completed! Please restart your terminal."
 else
     echo "🔧 Appending helper functions to .zshrc..."
     cat "$ASSETS_DIR/zshrc_snippet.sh" >> "$HOME/.zshrc"
