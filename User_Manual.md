@@ -195,5 +195,16 @@ claude --model claudecode/claude-sonnet-4-5-20250929-thinking
 
 ## ⚠️ 故障排除 (Troubleshooting)
 
+### 1. 防火墙拦截 (Firewall Issues) - **最常见问题！**
+如果你使用 **LuLu** 或 **Little Snitch**，必须手动放行以下程序，否则会报错 "Did 0 searches" 或 "500 Internal Server Error"。
+
+**请添加 "Allow" (允许) 规则给以下路径：**
+*   **Node.js** (用于联网搜索): `/usr/local/bin/node`
+*   **Python** (用于 API 代理): `/usr/bin/python3`
+*   **Curl** (用于网络测试): `/usr/bin/curl`
+
+### 2. 常见错误代码
 *   **404 Error**: 通常意味着 Proxy 没启动，或者 URL 配置错了。请运行 `start_claude_proxy`。
+*   **500 Error**: 通常是上游 API 报错，或者 Proxy 被防火墙拦截（见上条）。
 *   **Auth Conflict (权限冲突)**: 运行 `claude` -> 输入 `/logout` -> 退出重试。
+
