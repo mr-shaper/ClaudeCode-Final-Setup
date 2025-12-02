@@ -99,7 +99,7 @@ export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
 export PORT=8000
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
 export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
-export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
 
 # Function to switch modes and models
 claude-switch() {
@@ -116,7 +116,7 @@ claude-switch() {
         export PORT=8000
         export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
         export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
-        export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+        export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
         echo "🚀 Switched to Custom API Proxy Mode"
         start_claude_proxy
     elif [[ "$1" == "model" ]]; then
