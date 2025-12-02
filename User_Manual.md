@@ -121,21 +121,28 @@ brew install ripgrep
 npm install -g @modelcontextprotocol/server-brave-search
 ```
 
-### 2. 配置 Brave Search 插件
-**方式 A：使用官方命令 (推荐)**
-这是最简单的方法，直接在终端运行：
+### 2. 配置 Brave Search 插件 (最终解决方案)
 
+**核心原则**：直接使用 `claude mcp` 命令配置，它会自动处理配置文件路径，避免"全局配置 vs 项目配置"的冲突。
+
+**第一步：清理旧配置 (如果报错 "already exists")**
 ```bash
-# 替换为你的真实 Key
-claude mcp add brave-search -e BRAVE_API_KEY=你的_Key_粘贴在这里 -- npm @modelcontextprotocol/server-brave-search
+claude mcp remove brave-search
 ```
 
-**方式 B：手动配置 (高级)**
-如果你遇到权限问题，或者想通过 `.zshrc` 管理 Key，请使用此方法：
-1.  在 `.zshrc` 中添加 `export BRAVE_API_KEY="..."`
-2.  修改 `~/.claude/config.json` 指向本地插件路径。
+**第二步：添加新配置 (一键搞定)**
+直接运行下面这行命令（替换你的 Key）：
+```bash
+claude mcp add brave-search -e BRAVE_API_KEY=你的_Key_粘贴在这里 -- /usr/local/bin/node ~/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js
+```
+
+**为什么这样做？**
+1.  **`-e BRAVE_API_KEY=...`**：直接把 Key 写入配置，**以后启动不需要再手动 export 了！**
+2.  **`/usr/local/bin/node`**：使用绝对路径，防止因为环境变量问题找不到 Node。
+3.  **`~/.claude/mcp/...`**：指向我们之前安装好的插件代码。
 
 ---
+
 
 ## 🔧 3. 手动调试模式 (Manual Mode)
 如果你想了解底层发生了什么，或者脚本失效了，你可以手动运行以下命令来复现环境：

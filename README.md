@@ -27,6 +27,21 @@
 *   ✅ **Excel**：自动提取表格数据。
 *   这意味着你可以直接把这些文件扔给 Claude，让它帮你总结、分析数据！
 
+### 🛠️ 常见问题 (Troubleshooting)
+
+### Q: 联网搜索显示 "Did 0 searches" 或 "MCP server failed"？
+**原因 1：防火墙拦截**
+*   **症状**：`curl` 报错 `Bad file descriptor`。
+*   **解决**：检查 LuLu/Little Snitch，允许 `/usr/local/bin/node` 和 `curl` 联网。
+
+**原因 2：配置冲突**
+*   **症状**：手动改了配置文件没生效。
+*   **解决**：Claude 优先读取当前目录的 `.claude.json`。请使用 `claude mcp add` 命令来配置，不要手动改文件。
+
+### Q: 启动时提示 Auth conflict？
+这是正常的。因为我们同时使用了官方登录（用于下载模型）和自定义 API Key（用于对话）。
+*   **解决**：忽略即可，或者运行 `claude /logout` 退出官方登录（但这会导致无法自动下载新模型）。
+
 ### 🌐 联网搜索 (Web Search)
 *   ✅ **Brave Search**：集成官方搜索插件，支持实时联网查询。
 *   ✅ **环境隔离**：API Key 通过环境变量管理，安全灵活。
