@@ -121,17 +121,19 @@ brew install ripgrep
 npm install -g @modelcontextprotocol/server-brave-search
 ```
 
-### 2. 配置 API Key
-去 [Brave Search API](https://api.search.brave.com/app/keys) 申请免费 Key，然后添加到 `.zshrc`：
+### 2. 配置 Brave Search 插件
+**方式 A：使用官方命令 (推荐)**
+这是最简单的方法，直接在终端运行：
 
 ```bash
-# 打开配置文件
-open ~/.zshrc
-
-# 添加这一行 (填入你的 Key)
-export BRAVE_API_KEY="你的_BRAVE_SEARCH_API_KEY"
+# 替换为你的真实 Key
+claude mcp add brave-search -e BRAVE_API_KEY=你的_Key_粘贴在这里 -- npm @modelcontextprotocol/server-brave-search
 ```
-保存后运行 `source ~/.zshrc` 生效。
+
+**方式 B：手动配置 (高级)**
+如果你遇到权限问题，或者想通过 `.zshrc` 管理 Key，请使用此方法：
+1.  在 `.zshrc` 中添加 `export BRAVE_API_KEY="..."`
+2.  修改 `~/.claude/config.json` 指向本地插件路径。
 
 ---
 
