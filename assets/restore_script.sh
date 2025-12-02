@@ -55,8 +55,8 @@ if grep -q "Claude Code Helper Functions" "$HOME/.zshrc"; then
         cp -r "$PATCH_DIR/"* "$PROXY_DIR/"
         echo "✅ Proxy patches applied."
         
-        # Re-install dependencies to ensure new libs (pypdf etc.) are installed
-        echo "📦 Installing additional dependencies..."
+        # Re-install dependencies to ensure new libs (pypdf, pdfplumber etc.) are installed
+        echo "📦 Installing additional dependencies (including pdfplumber)..."
         pip3 install -r "$PROXY_DIR/requirements.txt" > /dev/null 2>&1
         echo "✅ Dependencies updated."
     else
