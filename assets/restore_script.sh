@@ -87,8 +87,15 @@ fi
     echo "🔧 Restoring CLAUDE.md (System Prompt)..."
     mkdir -p "$HOME/.claude"
     cp "$ASSETS_DIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-    cp "$ASSETS_DIR/Claude_Code_Token_Efficiency_Protocol.md" "$HOME/.claude/Token_Efficiency_Protocol.md"
-    echo "✅ CLAUDE.md and Efficiency Protocol restored."
+    cp "$ASSETS_DIR/Claude_Code_Token_Efficiency_Protocol.md" "$HOME/.claude/Claude_Code_Token_Efficiency_Protocol.md"
+    
+    # Deploy config.json with dynamic path replacement
+    if [ -f "$ASSETS_DIR/config.json" ]; then
+        sed "s|\$HOME|$HOME|g" "$ASSETS_DIR/config.json" > "$HOME/.claude/config.json"
+        echo "✅ Deployed ~/.claude/config.json"
+    fi
+    
+    echo "✅ Deployed ~/.claude/CLAUDE.md and Protocol"
 # 3. Restore Claude Configs
 restore_file "$ASSETS_DIR/claude.json" "$HOME/.claude.json"
 restore_file "$ASSETS_DIR/settings.local.json" "$HOME/.claude/settings.local.json"

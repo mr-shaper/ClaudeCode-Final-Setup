@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "brave-search": {
+            "command": "node",
+            "args": [
+                "$HOME/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
+            ]
+        }
+    }
+}
