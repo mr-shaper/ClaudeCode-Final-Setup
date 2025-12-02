@@ -107,6 +107,33 @@ claude "你的提示词..."
 *   **注意**：对于 Excel，它会读取所有 Sheet 的数据并转为 CSV 格式供 Claude 分析。
 
 ---
+## 🌐 4. 联网搜索配置 (Web Search)
+
+Claude Code 支持通过 MCP 插件进行联网搜索。
+
+### 1. 安装必要组件
+在终端运行：
+```bash
+# 1. 安装 ripgrep (搜索核心组件)
+brew install ripgrep
+
+# 2. 安装 Brave Search 插件
+npm install -g @modelcontextprotocol/server-brave-search
+```
+
+### 2. 配置 API Key
+去 [Brave Search API](https://api.search.brave.com/app/keys) 申请免费 Key，然后添加到 `.zshrc`：
+
+```bash
+# 打开配置文件
+open ~/.zshrc
+
+# 添加这一行 (填入你的 Key)
+export BRAVE_API_KEY="你的_BRAVE_SEARCH_API_KEY"
+```
+保存后运行 `source ~/.zshrc` 生效。
+
+---
 
 ## 🔧 3. 手动调试模式 (Manual Mode)
 如果你想了解底层发生了什么，或者脚本失效了，你可以手动运行以下命令来复现环境：

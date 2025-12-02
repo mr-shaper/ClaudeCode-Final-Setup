@@ -63,6 +63,20 @@ if grep -q "Claude Code Helper Functions" "$HOME/.zshrc"; then
         echo "⚠️ Proxy directory or patches not found. Skipping patch application."
     fi
 
+    # 5. Check for Web Search Dependencies
+    echo "🔍 Checking Web Search dependencies..."
+    if ! command -v rg &> /dev/null; then
+        echo "⚠️  'ripgrep' not found. Please run: brew install ripgrep"
+    else
+        echo "✅ 'ripgrep' is installed."
+    fi
+    
+    if [ ! -d "$HOME/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search" ]; then
+         echo "⚠️  Brave Search MCP not found. Please run: npm install -g @modelcontextprotocol/server-brave-search"
+    else
+         echo "✅ Brave Search MCP is installed."
+    fi
+
     echo "🎉 Restore completed! Please restart your terminal."
 else
     echo "🔧 Appending helper functions to .zshrc..."
