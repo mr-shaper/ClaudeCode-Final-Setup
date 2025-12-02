@@ -177,19 +177,33 @@ claude --model claudecode/claude-sonnet-4-5-20250929-thinking
 
 ---
 
-## 🔄 4. 切换配置 (Switching Configs)
+## 🔄 4. 模式切换 (Switching Modes)
 
-### 切换回官方 Claude (Standard)
+我为你新增了一个强大的命令 `claude-switch`，可以一键切换模式：
+
+### 切换回官方 Claude (Native)
 如果你想使用官方 Anthropic API (付费账号)：
-1.  打开 `~/.zshrc`。
-2.  **注释掉** 整个 "Claude Code Configuration" 代码块 (在 `export` 行前面加 `#`)。
-3.  运行 `source ~/.zshrc`。
-4.  运行 `claude /login` 进行官方登录。
+```zsh
+claude-switch native
+```
+*然后运行 `claude login` 进行登录。*
 
-### 切换回自定义 API (Custom)
-1.  取消 `~/.zshrc` 中的注释。
-2.  运行 `source ~/.zshrc`。
-3.  运行 `start_claude_proxy`。
+### 切换回自定义 API (Proxy)
+如果你想切回 Kimi/Opendoor：
+```zsh
+claude-switch proxy
+```
+*会自动重新加载配置并启动代理。*
+
+### 切换模型 (Switch Model)
+想换个模型试试？
+```zsh
+claude-switch model "kimi-k2-thinking"
+```
+或者查看当前模型：
+```zsh
+claude-switch model
+```
 
 ---
 

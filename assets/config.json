@@ -1,13 +1,10 @@
 {
     "mcpServers": {
         "brave-search": {
-            "command": "/usr/local/bin/node",
+            "command": "/Users/mrshaper/.claude/debug_mcp.sh",
             "args": [
-                "$HOME/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
-            ],
-            "env": {
-                "BRAVE_API_KEY": "YOUR_BRAVE_KEY_HERE"
-            }
+                "/Users/mrshaper/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
+            ]
         }
     }
 }

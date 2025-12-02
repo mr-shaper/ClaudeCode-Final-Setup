@@ -3,17 +3,44 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Claude Code Configuration (via Local Proxy)
 # The Proxy translates Claude's requests to OpenAI format for your custom API
+# Default Configuration Values
 export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
 export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
 export PORT=8000
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-# 注意：这里也填同一个 Key！(Claude CLI 需要检查 Key 格式，虽然它实际上是通过 Proxy 转发的)
 export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
-
-# 4. Search Config (Brave Search API Key)
-# Get key: https://api.search.brave.com/app/keys
-# export BRAVE_API_KEY="YOUR_BRAVE_KEY_HERE" # Uncomment to hardcode, or export manually in terminal
 export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+
+# Function to switch modes and models
+claude-switch() {
+    if [[ "$1" == "native" ]]; then
+        unset ANTHROPIC_API_KEY
+        unset ANTHROPIC_BASE_URL
+        unset OPENAI_API_KEY
+        unset OPENAI_BASE_URL
+        echo "✅ Switched to Native Claude (Official Account)"
+        echo "Run 'claude login' if you haven't logged in."
+    elif [[ "$1" == "proxy" ]]; then
+        export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
+        export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+        export PORT=8000
+        export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
+        export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+        export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+        echo "🚀 Switched to Custom API Proxy Mode"
+        start_claude_proxy
+    elif [[ "$1" == "model" ]]; then
+        if [[ -n "$2" ]]; then
+            export ANTHROPIC_MODEL="$2"
+            echo "✅ Model switched to: $2"
+        else
+            echo "Current model: $ANTHROPIC_MODEL"
+            echo "Usage: claude-switch model <model_name>"
+        fi
+    else
+        echo "Usage: claude-switch [native|proxy|model]"
+    fi
+}
 
 # Function to start the proxy in background
 start_claude_proxy() {
@@ -25,7 +52,7 @@ start_claude_proxy() {
 
 # Claude Code Context Injection & Model Enforcement
 claude() {
-    local config_file="$HOME/.claude/CLAUDE.md"
+    local config_file="/Users/mrshaper/Library/Mobile Documents/com~apple~CloudDocs/Career/US Project/Claude_Code_优化配置/configs/CLAUDE.md"
     
     # Construct the command with explicit model and system prompt
     # We use the array approach to safely handle arguments
@@ -45,7 +72,6 @@ claude() {
              cmd+=("--system-prompt" "$(cat "$config_file")")
          fi
     fi
-
-    # Execute the command with all arguments
+    
     "${cmd[@]}" "$@"
 }

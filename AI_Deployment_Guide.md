@@ -56,3 +56,11 @@ The setup relies on three environment variables working in harmony:
 1.  `OPENAI_BASE_URL`: Points the Proxy to the *Real* API (e.g., `ai.opendoor.cn`).
 2.  `ANTHROPIC_BASE_URL`: Points the CLI to the *Proxy* (`http://127.0.0.1:8000`).
 3.  `ANTHROPIC_MODEL`: Forces the CLI to send the specific model string the API expects.
+
+## 🔄 Mode Switching
+
+We provide a `claude-switch` command to easily toggle between modes:
+
+- `claude-switch native`: Switch to official Anthropic API (requires login).
+- `claude-switch proxy`: Switch to Custom API Proxy (Kimi/Opendoor).
+- `claude-switch model "model-name"`: Change the model used by the proxy.
