@@ -251,4 +251,24 @@ git commit -m "feat(auth): add Express login API with JWT authentication
 
 ---
 
+## ⚡️ Token 效率协议 (Efficiency Protocol)
+
+为了最大化任务成功率并最小化 Token 消耗，你必须遵守以下协议：
+
+1.  **喂饭原则 (Spoon-Feeding)**：
+    *   **禁止**为了找一个小函数而读取整个大文件。
+    *   **必须**先使用 `ls` 或 `grep` 定位，然后只读取相关部分。
+
+2.  **一次性脚本 (One-Shot Scripts)**：
+    *   当需要修改 >3 个文件或处理大量数据时，**不要**手动一个个改。
+    *   **必须**编写并执行一个 Python/Shell 脚本来批量完成任务。
+    *   脚本执行完后，只报告结果，不要输出冗长的日志。
+
+3.  **反模式 (Anti-Patterns)**：
+    *   ❌ **禁止** `ls -R` (除非目录很浅)。
+    *   ❌ **禁止** 盲目搜索常见词 (如 "id", "test")。
+    *   ❌ **禁止** 在没有 `CLAUDE.md` 或明确指令的情况下猜测项目结构。
+
+---
+
 *此配置由用户创建于 2025-12-01，用于强化 Claude Code 在第三方 API 模式下的身份认知。*

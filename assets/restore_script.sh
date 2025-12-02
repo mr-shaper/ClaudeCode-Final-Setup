@@ -70,11 +70,11 @@ else
 fi
 
 # 2. Restore CLAUDE.md
-# Note: The path is hardcoded based on your specific setup. 
-# If you change this path, update it in your .zshrc too!
-TARGET_CLAUDE_MD="/Users/mrshaper/Library/Mobile Documents/com~apple~CloudDocs/Career/US Project/Claude_Code_优化配置/configs/CLAUDE.md"
-restore_file "$ASSETS_DIR/CLAUDE.md" "$TARGET_CLAUDE_MD"
-
+    echo "🔧 Restoring CLAUDE.md (System Prompt)..."
+    mkdir -p "$HOME/.claude"
+    cp "$ASSETS_DIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+    cp "$ASSETS_DIR/Claude_Code_Token_Efficiency_Protocol.md" "$HOME/.claude/Token_Efficiency_Protocol.md"
+    echo "✅ CLAUDE.md and Efficiency Protocol restored."
 # 3. Restore Claude Configs
 restore_file "$ASSETS_DIR/claude.json" "$HOME/.claude.json"
 restore_file "$ASSETS_DIR/settings.local.json" "$HOME/.claude/settings.local.json"
