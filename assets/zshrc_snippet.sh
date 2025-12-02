@@ -9,7 +9,10 @@ export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
 export PORT=8000
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
 export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
-export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
+# Alternative models:
+# export ANTHROPIC_MODEL="kimi-k2-0905-preview"  # Kimi latest
+# export ANTHROPIC_MODEL="gemini-3-pro-preview-thinking"  # Gemini
 
 # Function to switch modes and models
 claude-switch() {

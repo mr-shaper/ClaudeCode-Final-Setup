@@ -198,7 +198,13 @@ claude-switch proxy
 ### 切换模型 (Switch Model)
 想换个模型试试？
 ```zsh
-claude-switch model "kimi-k2-thinking"
+# Kimi 模型 (两个版本可选)
+claude-switch model "kimi-k2-0905-preview"  # 推荐：最新版本
+claude-switch model "kimi-k2-0711-preview"
+
+# Gemini 模型
+claude-switch model "gemini-3-pro-preview-thinking"
+claude-switch model "gemini-2.5-pro-thinking"
 ```
 或者查看当前模型：
 ```zsh
