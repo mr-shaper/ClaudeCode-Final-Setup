@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:zcnpnqs73en8.feishu.cn)",
+      "WebFetch(domain:accounts.feishu.cn)",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(pnpm --version:*)",
+      "Bash(git --version)",
+      "Bash(mkdir:*)",
+      "Bash(brew install:*)",
+      "Bash(/usr/local/bin/node:*)",
+      "Bash(/opt/homebrew/bin/node --version)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "Bash(scutil --dns:*)",
+      "Bash(echo:*)",
+      "Bash(npm install:*)",
+      "Bash(sudo npm install:*)",
+      "Bash(corepack enable)",
+      "Bash(corepack prepare:*)",
+      "Bash(sudo -S npm install:*)",
+      "Bash(git clone:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
