@@ -4,7 +4,10 @@
             "command": "/Users/mrshaper/.claude/debug_mcp.sh",
             "args": [
                 "/Users/mrshaper/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
-            ]
+            ],
+            "env": {
+                "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
+            }
         }
     }
 }

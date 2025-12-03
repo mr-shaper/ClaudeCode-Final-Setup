@@ -1,5 +1,11 @@
 # Claude Code 本地化/自定义 API 完美解决方案
-# (Claude Code Custom API Solution)
+## ✨ Key Features (v2.1.0)
+
+- **Dynamic Subagent Selection**: Automatically pairs the correct subagent model (Haiku/Kimi/Gemini) with your chosen main model to ensure consistent behavior.
+- **OAuth Conflict Resolution**: Automatically manages authentication state to prevent conflicts between official Claude accounts and custom API keys.
+- **Automatic Log Recording**: Full request/response logging to `~/.claude-code-proxy/proxy.log`.
+- **Smart Model Switching**: `claude-switch` command handles model switching, quote stripping, and mode toggling.
+- **Cost-Effective**: Uses custom API endpoints (e.g., Kimi, Gemini) to significantly reduce costs compared to official Anthropic keys.
 
 ## 📖 这是什么？(What is this?)
 这是一个让你能用 **Kimi、Opendoor 或其他 OpenAI 格式的 API** 来驱动 **Claude Code**（Anthropic 官方强大的编程助手）的完整解决方案。

@@ -21,6 +21,30 @@
 *如果你更换了新电脑，或者想重置环境，请按以下步骤操作：*
 
 1.  **安装基础依赖**:
+   ### 5.3 Debugging & Logs
+
+If you encounter issues, check the automatic log file:
+
+```bash
+# View real-time logs
+tail -f ~/.claude-code-proxy/proxy.log
+
+# View last 100 lines
+tail -n 100 ~/.claude-code-proxy/proxy.log
+```
+
+**Log entries to look for:**
+- `INCOMING REQUEST`: Shows what model Claude Code is requesting.
+- `Sending HTTP Request`: Shows the request being sent to the upstream API.
+- `HTTP Response`: Shows the status code from the upstream API (200 = OK, 503 = Error).
+
+### 5.4 Common Error Codes
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| 503 | Service Unavailable | The upstream model is down. Switch models using `claude-switch model ...` |
+| 401 | Unauthorized | API Key is invalid. Check `ANTHROPIC_API_KEY` in `~/.zshrc`. |
+| 400 | Bad Request | Request format error. Check logs for details. |
     *   Node.js & NPM
     *   Python 3 & Pip
     *   Claude CLI: `npm install -g @anthropic-ai/claude-code`
@@ -140,6 +164,12 @@ claude mcp add brave-search -e BRAVE_API_KEY=你的_Key_粘贴在这里 -- /usr/
 1.  **`-e BRAVE_API_KEY=...`**：直接把 Key 写入配置，**以后启动不需要再手动 export 了！**
 2.  **`/usr/local/bin/node`**：使用绝对路径，防止因为环境变量问题找不到 Node。
 3.  **`~/.claude/mcp/...`**：指向我们之前安装好的插件代码。
+
+### 3. 常见问题：搜索结果为 0 (Did 0 searches)
+如果你看到 `Did 0 searches`，这通常意味着：
+1.  **你直接搜索了一个 URL**：Brave 搜索引擎可能没有收录这个具体的长链接。**解决方法**：请使用关键词搜索，例如 `claude "搜索一下 Kimi 的价格"`。
+2.  **API Key 无效**：请检查你的 Key 是否正确。
+
 
 ---
 

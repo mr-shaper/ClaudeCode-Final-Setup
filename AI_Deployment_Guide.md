@@ -57,6 +57,13 @@ The setup relies on three environment variables working in harmony:
 2.  `ANTHROPIC_BASE_URL`: Points the CLI to the *Proxy* (`http://127.0.0.1:8000`).
 3.  `ANTHROPIC_MODEL`: Forces the CLI to send the specific model string the API expects.
 
+## ⚠️ Critical Configuration Note: The "Config Override" Trap
+
+Claude Code has a known behavior where **Project-Level Configuration** (`~/.claude.json`) overrides **Global Configuration** (`~/.claude/config.json`).
+
+*   **The Problem**: If `~/.claude.json` contains an empty `"mcpServers": {}` block (which can happen automatically), Claude Code will **IGNORE** your global MCP settings in `~/.claude/config.json`.
+*   **The Fix**: Always use the `claude mcp add` command to register tools. This command automatically handles the configuration injection into the correct file, ensuring your tools actually work.
+
 ## 🔄 Mode Switching
 
 We provide a `claude-switch` command to easily toggle between modes:

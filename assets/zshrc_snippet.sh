@@ -126,6 +126,8 @@ claude-switch() {
             model_name="${model_name//\'/}"
             export ANTHROPIC_MODEL="$model_name"
             echo "✅ Model switched to: $model_name"
+            echo "🔄 Restarting proxy to apply model change..."
+            start_claude_proxy
         else
             echo "Current model: $ANTHROPIC_MODEL"
             echo "Usage: claude-switch model <model_name>"
