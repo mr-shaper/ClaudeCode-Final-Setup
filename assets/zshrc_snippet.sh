@@ -137,7 +137,18 @@ claude-switch() {
 
 # Function to start the proxy in background
 start_claude_proxy() {
-    pkill -f "src.main:app" # Kill existing instance if any
+    # Kill any existing proxy instances
+    pkill -f "python3.*start_proxy.py" 2>/dev/null
+    sleep 0.5
+    
+    # Check if port 8000 is still in use
+    if lsof -i :8000 >/dev/null 2>&1; then
+        echo "⚠️  Port 8000 is in use, forcefully killing..."
+        kill -9 $(lsof -t -i:8000) 2>/dev/null
+        sleep 0.5
+    fi
+    
+    # Start new proxy instance
     nohup python3 ~/.claude-code-proxy/start_proxy.py > ~/.claude-code-proxy/proxy.log 2>&1 &
     echo "🚀 Claude Proxy started on port 8000"
     echo "Logs: ~/.claude-code-proxy/proxy.log"
