@@ -28,7 +28,8 @@ class Config:
         # Model settings - BIG and SMALL models
         self.big_model = os.environ.get("BIG_MODEL", "gpt-4o")
         self.middle_model = os.environ.get("MIDDLE_MODEL", self.big_model)
-        self.small_model = os.environ.get("SMALL_MODEL", "claude-sonnet-4-5-20250929-thinking")
+        # CRITICAL: Default fallback for subagents if dynamic logic doesn't match
+        self.small_model = os.environ.get("SMALL_MODEL", "claude-haiku-4-5-20251001")
         
     def validate_api_key(self):
         """Basic API key validation"""
