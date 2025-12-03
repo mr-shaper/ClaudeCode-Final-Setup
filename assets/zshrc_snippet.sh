@@ -94,11 +94,11 @@ export PATH="$HOME/.local/bin:$PATH"
 # Claude Code Configuration (via Local Proxy)
 # The Proxy translates Claude's requests to OpenAI format for your custom API
 # Default Configuration Values
-export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
 export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
 export PORT=8000
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
 export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
 
 # Function to switch modes and models
@@ -112,10 +112,11 @@ claude-switch() {
         echo "Run 'claude login' if you haven't logged in."
     elif [[ "$1" == "proxy" ]]; then
         export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
-        export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
-        export PORT=8000
-        export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-        export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+        export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
+export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
+export PORT=8000
+export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
+export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
         export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
         echo "🚀 Switched to Custom API Proxy Mode"
         start_claude_proxy

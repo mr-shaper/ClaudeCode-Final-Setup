@@ -22,8 +22,8 @@
 ### Documentation & Security
 - **Updated Deployment Guide**: Added critical warning about "Project Config Override" and the correct MCP setup method.
 - **Updated User Manual**: Added troubleshooting for "0 searches" and clarified the `claude mcp add` command usage.
-- **Security**: Desensitized `assets/config.json` to remove hardcoded API keys before GitHub push.
-- **Restore Script**: Updated `restore_script.sh` to explicitly prompt for `BRAVE_API_KEY` configuration.
+- **Security**: Desensitized `assets/config.json` AND `assets/zshrc_snippet.sh` to remove ALL hardcoded API keys.
+- **Restore Script**: Updated `restore_script.sh` with step-by-step guides for configuring both Main API Keys and Brave Search Key.
 - **Config Fix**: Removed empty `mcpServers` block from `assets/claude.json` to prevent overriding global settings on new installs.
 - Added "Debugging & Logs" section to `User_Manual.md`.
 - Updated `README.md` with new v2.1.0 features.
