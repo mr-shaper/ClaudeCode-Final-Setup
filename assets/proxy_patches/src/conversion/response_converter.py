@@ -151,17 +151,17 @@ async def convert_openai_streaming_to_claude(
                             if tc_delta.get("id"):
                                 tool_call["id"] = tc_delta["id"]
                             
-                            # Update function name and start content block if we have both id and name
+                            # Update function name and start content block
                             function_data = tc_delta.get(Constants.TOOL_FUNCTION, {})
                             if function_data.get("name"):
                                 tool_call["name"] = function_data["name"]
 
-                            # Auto-generate ID if missing but name is present (fix for some non-standard APIs)
+                            # Robustness Fix: If we have a name, ensure we have an ID and START.
+                            # Some models (DeepSeek/Kimi) might stream name first, then args, maybe never a clear ID.
                             if tool_call["name"] and not tool_call["id"]:
                                 tool_call["id"] = f"call_{uuid.uuid4().hex[:24]}"
-                            
-                            # Start content block when we have complete initial data
-                            if (tool_call["id"] and tool_call["name"] and not tool_call["started"]):
+
+                            if (tool_call["name"] and not tool_call["started"]):
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
