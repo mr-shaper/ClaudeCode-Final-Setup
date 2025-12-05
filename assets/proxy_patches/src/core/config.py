@@ -26,7 +26,7 @@ class Config:
         self.max_retries = int(os.environ.get("MAX_RETRIES", "2"))
         
         # Model settings - BIG and SMALL models
-        self.big_model = os.environ.get("BIG_MODEL", "gpt-4o")
+        self.big_model = os.environ.get("BIG_MODEL", "claude-sonnet-4-5-20250929-thinking")
         self.middle_model = os.environ.get("MIDDLE_MODEL", self.big_model)
         # CRITICAL: Default fallback for subagents if dynamic logic doesn't match
         self.small_model = os.environ.get("SMALL_MODEL", "claude-haiku-4-5-20251001")

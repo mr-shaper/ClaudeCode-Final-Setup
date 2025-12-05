@@ -119,7 +119,11 @@ def convert_claude_to_openai(
         if choice_type == "auto":
             openai_request["tool_choice"] = "auto"
         elif choice_type == "any":
-            openai_request["tool_choice"] = "auto"
+            # "any" forces tool use. OpenAI equivalent is "required" or naming a tool, 
+            # but "required" is safer for general use if supported, or "auto" with strict prompts.
+            # For robustness, we map 'any' to 'required' if we want to force it, but 'auto' is standard.
+            # Let's try 'required' to match Claude's intent of "must use tool".
+            openai_request["tool_choice"] = "required"
         elif choice_type == "tool" and "name" in claude_request.tool_choice:
             openai_request["tool_choice"] = {
                 "type": Constants.TOOL_FUNCTION,
@@ -127,6 +131,17 @@ def convert_claude_to_openai(
             }
         else:
             openai_request["tool_choice"] = "auto"
+    elif openai_request.get("tools"): 
+        # CRITICAL FIX: If tools exist but no preference, explicit 'auto' helps some models.
+        openai_request["tool_choice"] = "auto"
+
+    # Debug: Log the full converted request tools and tool_choice
+    if "tools" in openai_request:
+        logger.info(f"🚀 Outgoing Tools Count: {len(openai_request['tools'])}")
+        logger.debug(f"🛠️ Tools Payload: {json.dumps(openai_request['tools'], indent=2, ensure_ascii=False)}")
+    
+    if "tool_choice" in openai_request:
+        logger.info(f"👉 Tool Choice: {openai_request['tool_choice']}")
 
     return openai_request
 

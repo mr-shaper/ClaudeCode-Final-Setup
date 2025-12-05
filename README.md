@@ -1,6 +1,8 @@
 # Claude Code 本地化/自定义 API 完美解决方案
-## ✨ Key Features (v2.1.0)
+## ✨ Key Features (v2.2.0)
 
+- **Corrected Model Configuration**: Now uses real Claude models (`claude-sonnet-4-5-20250929-thinking`) supported by upstream API instead of defaulting to `gpt-4o`.
+- **Robust Streaming**: Fixed critical crashes ("NoneType" errors) when upstream API returns empty tool call deltas.
 - **Dynamic Subagent Selection**: Automatically pairs the correct subagent model (Haiku/Kimi/Gemini) with your chosen main model to ensure consistent behavior.
 - **OAuth Conflict Resolution**: Automatically manages authentication state to prevent conflicts between official Claude accounts and custom API keys.
 - **Automatic Log Recording**: Full request/response logging to `~/.claude-code-proxy/proxy.log`.
@@ -50,6 +52,10 @@
 ### Q: 启动时提示 Auth conflict？
 这是正常的。因为我们同时使用了官方登录（用于下载模型）和自定义 API Key（用于对话）。
 *   **解决**：忽略即可，或者运行 `claude /logout` 退出官方登录（但这会导致无法自动下载新模型）。
+
+### Q: Claude 回答 "NoneType is not iterable" 或崩溃？
+这是旧版本代理的一个已知问题。
+*   **解决**：请运行 `assets/restore_script.sh` 升级到 **v2.2.0** 或更高版本。我们修复了流式传输中的空值检查。
 
 ### 🌐 联网搜索 (Web Search)
 *   ✅ **Brave Search**：集成官方搜索插件，支持实时联网查询。

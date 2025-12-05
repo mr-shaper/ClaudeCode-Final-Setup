@@ -91,6 +91,9 @@ source $ZSH/oh-my-zsh.sh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="$HOME/.local/bin:$PATH"
 
+# Claude Code Helper Functions
+# ==============================================================================
+
 # Claude Code Configuration (via Local Proxy)
 # The Proxy translates Claude's requests to OpenAI format for your custom API
 # Default Configuration Values
@@ -100,6 +103,10 @@ export PORT=8000
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
 export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
 export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
+export ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5-20251001"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5-20251001"
+export SMALL_MODEL="claude-haiku-4-5-20251001"
+export BRAVE_API_KEY="BSAyWb51QxF4XrCee2SnYIYH0lnOHYD"
 
 # Function to switch modes and models
 claude-switch() {
@@ -108,6 +115,10 @@ claude-switch() {
         unset ANTHROPIC_BASE_URL
         unset OPENAI_API_KEY
         unset OPENAI_BASE_URL
+        unset ANTHROPIC_MODEL
+        unset ANTHROPIC_SMALL_FAST_MODEL
+        unset ANTHROPIC_DEFAULT_HAIKU_MODEL
+        unset SMALL_MODEL
         echo "✅ Switched to Native Claude (Official Account)"
         echo "Run 'claude login' if you haven't logged in."
     elif [[ "$1" == "proxy" ]]; then
@@ -117,12 +128,20 @@ claude-switch() {
         export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
         export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
         export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
+        export ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5-20251001"
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5-20251001"
+        export SMALL_MODEL="claude-haiku-4-5-20251001"
         echo "🚀 Switched to Custom API Proxy Mode"
         start_claude_proxy
     elif [[ "$1" == "model" ]]; then
         if [[ -n "$2" ]]; then
-            export ANTHROPIC_MODEL="$2"
-            echo "✅ Model switched to: $2"
+            # Strip surrounding quotes if present
+            model_name="${2//\"/}"
+            model_name="${model_name//\'/}"
+            export ANTHROPIC_MODEL="$model_name"
+            echo "✅ Model switched to: $model_name"
+            echo "🔄 Restarting proxy to apply model change..."
+            start_claude_proxy
         else
             echo "Current model: $ANTHROPIC_MODEL"
             echo "Usage: claude-switch model <model_name>"
@@ -134,7 +153,11 @@ claude-switch() {
 
 # Function to start the proxy in background
 start_claude_proxy() {
-    pkill -f "src.main:app" # Kill existing instance if any
+    # Kill any existing proxy instances
+    pkill -f "src.main" 2>/dev/null
+    pkill -f "start_proxy.py" 2>/dev/null
+    sleep 0.5
+    
     nohup python3 ~/.claude-code-proxy/start_proxy.py > ~/.claude-code-proxy/proxy.log 2>&1 &
     echo "🚀 Claude Proxy started on port 8000"
     echo "Logs: ~/.claude-code-proxy/proxy.log"
@@ -142,27 +165,31 @@ start_claude_proxy() {
 
 # Claude Code Context Injection & Model Enforcement
 claude() {
-    local config_file="/Users/mrshaper/Library/Mobile Documents/com~apple~CloudDocs/Career/US Project/Claude_Code_优化配置/configs/CLAUDE.md"
+    # 配置文件路径
+    local config_file="$HOME/.claude/CLAUDE.md"
     
-    # Construct the command with explicit model and system prompt
-    # We use the array approach to safely handle arguments
+    # 构造基础命令
     local cmd=("command" "claude")
 
-    # Always enforce the custom model if ANTHROPIC_API_KEY is set
+    # 1. 强制使用自定义模型 (Thinking)
     if [[ -n "$ANTHROPIC_API_KEY" ]]; then
-        # Check if user already supplied --model
         if [[ "$*" != *"--model"* ]]; then
-            cmd+=("--model" "$ANTHROPIC_MODEL")
+            if [[ -n "$ANTHROPIC_MODEL" ]]; then
+                cmd+=("--model" "$ANTHROPIC_MODEL")
+            fi
         fi
     fi
 
-    # Inject system prompt if config exists
+    # 2. 注入身份认知 (关键修复)
+    # 使用 --append-system-prompt 将 CLAUDE.md 的内容附加到系统提示中
+    # 这样既保留了 Claude Code 的原生能力，又增加了您的自定义身份
     if [[ -f "$config_file" ]]; then
-         if [[ "$*" != *"--system-prompt"* ]]; then
-             cmd+=("--system-prompt" "$(cat "$config_file")")
+         # 读取文件内容并转义换行符，防止 Shell 错误
+         local sys_prompt=$(cat "$config_file")
+         if [[ "$*" != *"--append-system-prompt"* ]]; then
+             cmd+=("--append-system-prompt" "$sys_prompt")
          fi
     fi
     
     "${cmd[@]}" "$@"
 }
-

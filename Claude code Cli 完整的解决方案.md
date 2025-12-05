@@ -10,7 +10,7 @@
 | :--- | :--- | :--- |
 | `OPENAI_BASE_URL` | 自定义 API 端点 | `https://ai.opendoor.cn/v1` |
 | `OPENAI_API_KEY` | 自定义 API 密钥 | `sk-EhA5...` |
-| `ANTHROPIC_MODEL` | **主模型** (用于复杂任务) | `claude-sonnet-4-5-20250929-thinking` |
+| `ANTHROPIC_MODEL` | **主模型** (用于复杂任务) | `claudecode/claude-sonnet-4-5-20250929-thinking` |
 | `SMALL_MODEL` | **轻量模型** (用于快速/简单任务) | `claude-haiku-4-5-20251001` 或 `gpt-4o-mini` |
 | `ANTHROPIC_BASE_URL` | **本地代理地址** (勿动) | `http://127.0.0.1:8000` |
 | `PORT` | 本地代理端口 | `8000` |
@@ -44,7 +44,7 @@ claude-switch model
 **切换指定模型**
 ```bash
 # Claude 4.5 Sonnet (Thinking)
-claude-switch model claude-sonnet-4-5-20250929-thinking
+claude-switch model claudecode/claude-sonnet-4-5-20250929-thinking
 
 # Kimi k2 (Thinking)
 claude-switch model kimi-k2-thinking

@@ -1,7 +1,7 @@
 # Claude Code 终极配置指南
 
 **状态:** ✅ 测试通过 (已启用 Proxy + 自定义 API)
-**版本:** 1.0
+**版本:** 2.2.0 (2025-12-04)
 
 本指南将帮助你使用自定义的 Claude API (Kimi/Opendoor) 并启用**完整的原生工具执行能力**（如创建文件、运行命令）。
 
@@ -21,30 +21,6 @@
 *如果你更换了新电脑，或者想重置环境，请按以下步骤操作：*
 
 1.  **安装基础依赖**:
-   ### 5.3 Debugging & Logs
-
-If you encounter issues, check the automatic log file:
-
-```bash
-# View real-time logs
-tail -f ~/.claude-code-proxy/proxy.log
-
-# View last 100 lines
-tail -n 100 ~/.claude-code-proxy/proxy.log
-```
-
-**Log entries to look for:**
-- `INCOMING REQUEST`: Shows what model Claude Code is requesting.
-- `Sending HTTP Request`: Shows the request being sent to the upstream API.
-- `HTTP Response`: Shows the status code from the upstream API (200 = OK, 503 = Error).
-
-### 5.4 Common Error Codes
-
-| Error | Meaning | Solution |
-|-------|---------|----------|
-| 503 | Service Unavailable | The upstream model is down. Switch models using `claude-switch model ...` |
-| 401 | Unauthorized | API Key is invalid. Check `ANTHROPIC_API_KEY` in `~/.zshrc`. |
-| 400 | Bad Request | Request format error. Check logs for details. |
     *   Node.js & NPM
     *   Python 3 & Pip
     *   Claude CLI: `npm install -g @anthropic-ai/claude-code`
@@ -80,7 +56,11 @@ tail -n 100 ~/.claude-code-proxy/proxy.log
     export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
     # 注意：这里也填同一个 Key！(Claude CLI 需要检查 Key 格式，虽然它实际上是通过 Proxy 转发的)
     export ANTHROPIC_API_KEY="sk-YOUR_KEY_HERE" 
-    export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+    
+    # 4. 模型配置 (v2.2.0 更新)
+    # 使用真实的 Claude 模型名称，避免 gpt-4o 错误
+    export ANTHROPIC_MODEL="claude-sonnet-4-5-20250929-thinking"
+    export SMALL_MODEL="claude-haiku-4-5-20251001"
     # ---------------------------
     ```
 
@@ -173,90 +153,92 @@ claude mcp add brave-search -e BRAVE_API_KEY=你的_Key_粘贴在这里 -- /usr/
 
 ---
 
+## 🛠️ 5. 进阶技能 (Advanced Skills)
 
-## 🔧 3. 手动调试模式 (Manual Mode)
-如果你想了解底层发生了什么，或者脚本失效了，你可以手动运行以下命令来复现环境：
+除了联网搜索，我们还为你准备了两个强大的进阶技能：**Puppeteer (浏览器自动化)** 和 **GitHub (代码仓库管理)**。
 
-```zsh
-# 1. 加载配置
-source ~/.zshrc
+### 1. Puppeteer (网页自动化)
+让 Claude 拥有一个真实的浏览器，可以截图、点击按钮、抓取动态网页数据。
 
-# 2. (可选) 手动设置环境变量 - 脚本已自动处理，这里仅作演示
-# 告诉 Proxy 去哪里请求 (Kimi/Opendoor)
-# 请替换为你自己的 API 地址和 Key
-export OPENAI_BASE_URL="https://api.example.com/v1"
-export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
-
-# 告诉 Claude CLI 连接到本地 Proxy (关键步骤！)
-export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-# 这里通常填一样的 Key，用于 CLI 格式校验
-export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
-
-# 3. 启动 Claude (指定模型)
-claude --model claudecode/claude-sonnet-4-5-20250929-thinking
+**安装命令：**
+```bash
+claude mcp add puppeteer -- npx -y @modelcontextprotocol/server-puppeteer
 ```
 
-### 🧪 测试案例
-进入 Claude 后，你可以输入以下指令来测试工具执行能力：
+**使用示例：**
+*   "去 example.com 截个图"
+*   "把这个网页转成 PDF"
+*   "点击页面上的'登录'按钮"
 
-```text
-@~/.claude/CLAUDE.md 我需要在这里/Users/mrshaper/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/文档/Obsidian Vault/TEST 创建一个md，写一个50字的小故事
-```
+### 2. GitHub (仓库管理)
+让 Claude 直接操作你的 GitHub 仓库，查看 Issue、提交 PR、搜索代码。
 
-**预期结果：** Claude 会直接创建文件，而不是给你一段代码让你复制。
-
----
-
-## 🔄 4. 模式切换 (Switching Modes)
-
-我为你新增了一个强大的命令 `claude-switch`，可以一键切换模式：
-
-### 切换回官方 Claude (Native)
-如果你想使用官方 Anthropic API (付费账号)：
-```zsh
-claude-switch native
-```
-*然后运行 `claude login` 进行登录。*
-
-### 切换回自定义 API (Proxy)
-如果你想切回 Kimi/Opendoor：
-```zsh
-claude-switch proxy
-```
-*会自动重新加载配置并启动代理。*
-
-### 切换模型 (Switch Model)
-想换个模型试试？
-```zsh
-# Kimi 模型 (多个版本可选)
-claude-switch model "kimi-k2-thinking"         # 基础版
-claude-switch model "kimi-k2-0905-preview"    # 0905 预览版
-claude-switch model "kimi-k2-0711-preview"    # 0711 预览版
-claude-switch model "kimi-k2-turbo-preview"   # Turbo 版
-
-# Gemini 模型
-claude-switch model "gemini-3-pro-preview-thinking"
-claude-switch model "gemini-2.5-pro-thinking"
-```
-或者查看当前模型：
-```zsh
-claude-switch model
+**安装命令：**
+```bash
+# 注意：这需要先申请 GitHub Personal Access Token
+export GITHUB_PERSONAL_ACCESS_TOKEN=你的_Token
+claude mcp add github -- npx -y @modelcontextprotocol/server-github
 ```
 
 ---
 
-## ⚠️ 故障排除 (Troubleshooting)
+## 🐛 6. Debugging & Logs
 
-### 1. 防火墙拦截 (Firewall Issues) - **最常见问题！**
-如果你使用 **LuLu** 或 **Little Snitch**，必须手动放行以下程序，否则会报错 "Did 0 searches" 或 "500 Internal Server Error"。
+### New Behavior Logging (v2.3.0)
+We have introduced a powerful logging system to diagnose "why Claude is acting stupid" (e.g., claiming to read files but not reading them).
 
-**请添加 "Allow" (允许) 规则给以下路径：**
-*   **Node.js** (用于联网搜索): `/usr/local/bin/node`
-*   **Python** (用于 API 代理): `/usr/bin/python3`
-*   **Curl** (用于网络测试): `/usr/bin/curl`
+**Log File Location:** `~/.claude-code-proxy/behavior.log`
 
-### 2. 常见错误代码
-*   **404 Error**: 通常意味着 Proxy 没启动，或者 URL 配置错了。请运行 `start_claude_proxy`。
-*   **500 Error**: 通常是上游 API 报错，或者 Proxy 被防火墙拦截（见上条）。
-*   **Auth Conflict (权限冲突)**: 运行 `claude` -> 输入 `/logout` -> 退出重试。
+This log captures the **full conversation** between Claude and the upstream API, including:
+*   `CLAUDE_REQUEST`: What Claude (CLI) sent to the Proxy.
+*   `OPENAI_REQUEST`: What the Proxy sent to Kimi/DeepSeek (Crucial for checking if file content was actually sent).
+*   `OPENAI_RESPONSE`: What Kimi/DeepSeek replied.
 
+**How to use:**
+```bash
+# View the detailed behavior log
+tail -f ~/.claude-code-proxy/behavior.log
+```
+
+### 🔧 Fix for File Reading Failure
+
+If Claude says "I will read the file" but nothing happens (no file content is shown), it is likely due to a missing ID in the tool call from the API provider.
+
+We have prepared a one-click fix script:
+
+```bash
+# Run the fix script
+"/Users/mrshaper/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/文档/Obsidian Vault/AI 应用/ClaudeCode_Final_Setup/assets/fix_proxy.sh"
+```
+
+This script will:
+1. Patch the proxy to handle missing tool call IDs.
+2. Restart the proxy automatically.
+3. **Hide "Thinking" Output**: Stops the model from reciting system instructions (the "Idiot" behavior).
+
+### ⚠️ Auth Conflict Warning
+
+If you see: `Auth conflict: Both a token (claude.ai) and an API key (ANTHROPIC_API_KEY) are set.`
+
+**Solution:**
+You must log out of the official Claude account to use the Proxy exclusively.
+In the Claude Code terminal, type:
+```
+/logout
+```
+(Or run `claude logout` in your normal terminal).
+
+### Standard Logs
+If you just want to see connection status:
+```bash
+tail -f ~/.claude-code-proxy/proxy.log
+```
+
+### Common Error Codes
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| 503 | Service Unavailable | The upstream model is down. Switch models using `claude-switch model ...` |
+| 401 | Unauthorized | API Key is invalid. Check `ANTHROPIC_API_KEY` in `~/.zshrc`. |
+| 400 | Bad Request | Request format error. Check logs for details. |
+| **Crash** | **"NoneType is not iterable"** | **Fixed in v2.2.0**. Run `assets/restore_script.sh` to update your proxy patches. |
