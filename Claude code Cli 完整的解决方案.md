@@ -90,6 +90,10 @@ claude-switch model gemini-3-pro-preview-thinking
         ```bash
         claude-switch proxy
         ```
+    4.  **环境彻底重置**：如果修改了配置（如 `.zshrc`）感觉未生效，执行以下命令彻底重载 Shell 及其所有变量：
+        ```bash
+        exec zsh
+        ```
 
 ---
 
