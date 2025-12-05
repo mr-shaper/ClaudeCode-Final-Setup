@@ -65,17 +65,20 @@ async def test_tool_execution():
                 print("-" * 50)
 
                 async for line in response.content:
-                    line = line.decode('utf-8').strip()
+                    line_decoded = line.decode('utf-8')
+                    # Print raw representation to see newlines/stripping issues
+                    print(f"[RAW] {repr(line_decoded)}")
+                    
+                    line = line_decoded.strip()
                     if not line:
                         continue
                         
                     if line.startswith("event:"):
-                        print(f"\n[EVENT] {line[6:].strip()}")
+                        print(f"  [EVENT] {line[6:].strip()}")
                     elif line.startswith("data:"):
                         data_str = line[5:].strip()
                         try:
                             data = json.loads(data_str)
-                            # Pretty print key events
                             if data.get('type') == 'content_block_start':
                                 print(f"  🟢 BLOCK START: {data['content_block']['type']}")
                                 if data['content_block']['type'] == 'tool_use':
@@ -83,13 +86,13 @@ async def test_tool_execution():
                             elif data.get('type') == 'content_block_delta':
                                 delta = data.get('delta', {})
                                 if delta.get('type') == 'text_delta':
-                                    # Print text content (thinking or answer)
-                                    sys.stdout.write(delta.get('text', ''))
-                                    sys.stdout.flush()
+                                    pass
+                                    # sys.stdout.write(delta.get('text', ''))
+                                    # sys.stdout.flush()
                                 elif delta.get('type') == 'input_json_delta':
                                     print(f"     INPUT: {delta.get('partial_json')}")
                         except:
-                            print(f"  [Raw Data]: {data_str}")
+                            print(f"  [Raw Data JSON Error]: {data_str}")
                 
                 print("\n" + "-" * 50)
                 print("🏁 Stream finished.")

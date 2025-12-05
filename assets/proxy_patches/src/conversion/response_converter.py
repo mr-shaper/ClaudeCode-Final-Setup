@@ -97,6 +97,7 @@ async def convert_openai_streaming_to_claude(
     tool_block_counter = 0
     current_tool_calls = {}
     final_stop_reason = Constants.STOP_END_TURN
+    text_block_closed = False
 
     try:
         async for line in openai_stream:
@@ -162,6 +163,12 @@ async def convert_openai_streaming_to_claude(
                                 tool_call["id"] = f"call_{uuid.uuid4().hex[:24]}"
 
                             if (tool_call["name"] and not tool_call["started"]):
+                                # CRITICAL FIX: Close the text/thinking block before starting tool block
+                                # This ensures sequential blocks (Thinking -> Tool) instead of parallel/interleaved
+                                if not text_block_closed:
+                                    yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': text_block_index}, ensure_ascii=False)}\n\n"
+                                    text_block_closed = True
+
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
@@ -191,7 +198,8 @@ async def convert_openai_streaming_to_claude(
         logger.error(f"Streaming error: {e}")
 
     # Send message stop event
-    yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': text_block_index}, ensure_ascii=False)}\n\n"
+    if not text_block_closed:
+        yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': text_block_index}, ensure_ascii=False)}\n\n"
     
     # Close any open tool blocks
     for tc_index, tool_call in current_tool_calls.items():
