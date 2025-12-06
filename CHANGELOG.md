@@ -1,6 +1,23 @@
 # Change Log - Claude Code Final Setup
 
-## v2.4.0 (2025-12-05) - "The Invisible Bridge"
+## v2.4.1 (2025-12-05) - "The Clean Slate" (Critical Stability Patch)
+
+### 🚀 Fixes & Optimizations
+1.  **Fix "Seasoning" Hang (Post-Tool Freeze)**
+    *   **Root Cause**: `response_converter.py` contained duplicate streaming logic blocks (legacy artifacts), causing double-processing of signals.
+    *   **Fix**: Aggressively refactored the converter to a single, clean linear pipeline.
+    *   **Feature**: Implemented **Invisible PING Events** during "Thinking" phases to prevent TCP timeouts while keeping the CLI silent.
+
+2.  **Fix "Token Explosion" (24k+ Tokens)**
+    *   **Forensic Analysis**: The previous "Parroting Bug" (where the model repeated history) caused the CLI to save massive text blocks into context memory, leading to a 24k token spike on subsequent requests.
+    *   **Prevention**: The "Prompt Reinforcement" (v2.4.0) prevents this.
+    *   **Remediation**: Users must reset their session (`/reset` or restart `claude`) to clear poisoned history.
+
+3.  **Documentation Update**
+    *   Added **Session Management** section to Solution Guide (New/Resume/Reset).
+
+---
+
 
 ### 🚀 Performance & Stability
 1.  **Fix "Spelunking" Hang (65 Tokens)**

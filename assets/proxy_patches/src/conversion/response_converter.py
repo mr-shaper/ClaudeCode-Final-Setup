@@ -137,43 +137,26 @@ async def convert_openai_streaming_to_claude(
                     delta = choice.get("delta") or {}
                     finish_reason = choice.get("finish_reason")
 
-                    # Handle text delta
-                    if delta and "content" in delta and delta["content"] is not None:
-                        # CRITICAL FIX: Close any open tool blocks before starting new text
-                        # This enforces strictly sequential blocks: Text -> Tool -> Text
-                        for tc_index, tool_call in current_tool_calls.items():
-                            if tool_call["started"]:
-                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
-                                tool_call["started"] = False
-
-                        # If the previous text block was closed (e.g. by a tool call), we must start a NEW one.
-                        if text_block_closed:
-                             # Increment index relative to the last tool or text block
-                             # We need a robust counter. Let's rely on `tool_block_counter` + initial text(1) + subsequent text blocks.
-                             # Actually, simpler: just increment a global block counter.
-                             # Let's refactor to use `current_block_index`
-                             pass 
-                        
-                        # REFACTORING ON THE FLY TO FIX INDEXING
-                        # We need to ensure we stream to the *current active* text block
-                        if text_block_closed:
-                            # Start a new text block
-                            # Calculate new index: It's 1 (initial) + tools found so far + any extra text blocks (track them)
-                            # To be safe, let's track `max_index_used`.
-                            pass
-
-                    # --- REFACTORED STREAMING LOGIC START ---
+                    # --- FINAL STREAMING LOGIC ---
                     
-                    # Handle text delta (Answer content)
+                    # 1. Handle Thinking/Reasoning (DeepSeek/Sonnet Thinking)
+                    # STRATEGY: Suppress/Hide it to prevent "Idiot Leaks". 
+                    # We just continue (skip) to keep the stream moving but silent.
+                    if delta and "reasoning_content" in delta and delta["reasoning_content"] is not None:
+                        # Keep connection alive during thinking without leaking text
+                        yield f"event: {Constants.EVENT_PING}\ndata: {json.dumps({'type': Constants.EVENT_PING}, ensure_ascii=False)}\n\n"
+                        continue
+
+                    # 2. Handle Text Content (The actual Answer)
                     if delta and "content" in delta and delta["content"] is not None:
-                        # Close tools before text
+                        # Ensure no open tool blocks interfere
                         for tc_index, tool_call in current_tool_calls.items():
                             if tool_call["started"]:
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
                                 tool_call["started"] = False
 
+                        # Ensure we have an open text block
                         if text_block_closed:
-                            # We need to restart a text block because we closed the previous one
                             text_block_index = max_index_used + 1
                             max_index_used = text_block_index
                             yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': text_block_index, 'content_block': {'type': Constants.CONTENT_TEXT, 'text': ''}}, ensure_ascii=False)}\n\n"
@@ -181,84 +164,48 @@ async def convert_openai_streaming_to_claude(
                         
                         yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': text_block_index, 'delta': {'type': Constants.DELTA_TEXT, 'text': delta['content']}}, ensure_ascii=False)}\n\n"
 
-                    # Handle reasoning/thinking delta (for Kimi/DeepSeek)
-                    if delta and "reasoning_content" in delta and delta["reasoning_content"] is not None:
-                         # CRITICAL FIX: Close tools before thinking too!
-                        for tc_index, tool_call in current_tool_calls.items():
-                            if tool_call["started"]:
-                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
-                                tool_call["started"] = False
-
-                        if text_block_closed:
-                            text_block_index = max_index_used + 1
-                            max_index_used = text_block_index
-                            yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': text_block_index, 'content_block': {'type': Constants.CONTENT_TEXT, 'text': ''}}, ensure_ascii=False)}\n\n"
-                            text_block_closed = False
-
-                        yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': text_block_index, 'delta': {'type': Constants.DELTA_TEXT, 'text': delta['reasoning_content']}}, ensure_ascii=False)}\n\n"
-
-                    # Handle tool call deltas with improved incremental processing
+                    # 3. Handle Tool Calls
                     if "tool_calls" in delta and delta["tool_calls"] is not None:
                         for tc_delta in delta["tool_calls"]:
                             tc_index = tc_delta.get("index", 0)
                             
-                            # Initialize tool call tracking by index if not exists
                             if tc_index not in current_tool_calls:
                                 current_tool_calls[tc_index] = {
-                                    "id": None,
-                                    "name": None,
-                                    "claude_index": None,
-                                    "started": False
+                                    "id": None, "name": None, "claude_index": None, "started": False
                                 }
-                            
                             tool_call = current_tool_calls[tc_index]
                             
-                            # Update tool call ID if provided
-                            if tc_delta.get("id"):
-                                tool_call["id"] = tc_delta["id"]
+                            if tc_delta.get("id"): tool_call["id"] = tc_delta["id"]
                             
-                            # Update function name and start content block
                             function_data = tc_delta.get(Constants.TOOL_FUNCTION, {})
-                            if function_data.get("name"):
-                                tool_call["name"] = function_data["name"]
+                            if function_data.get("name"): tool_call["name"] = function_data["name"]
 
-                            # Robustness Fix: If we have a name, ensure we have an ID and START.
-                            # Some models (DeepSeek/Kimi) might stream name first, then args, maybe never a clear ID.
+                            # Robust ID generation
                             if tool_call["name"] and not tool_call["id"]:
                                 tool_call["id"] = f"call_{uuid.uuid4().hex[:24]}"
 
                             if (tool_call["name"] and not tool_call["started"]):
-                                # CRITICAL FIX: Close the text/thinking block before starting tool block
-                                # This ensures sequential blocks (Thinking -> Tool) instead of parallel/interleaved
+                                # Close text block before starting tool
                                 if not text_block_closed:
                                     yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': text_block_index}, ensure_ascii=False)}\n\n"
                                     text_block_closed = True
 
                                 tool_block_counter += 1
-                                # claude_index = text_block_index + tool_block_counter # OLD BUGGY LOGIC
                                 claude_index = max_index_used + 1
                                 max_index_used = claude_index
-                                
                                 tool_call["claude_index"] = claude_index
                                 tool_call["started"] = True
                                 
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': claude_index, 'content_block': {'type': Constants.CONTENT_TOOL_USE, 'id': tool_call['id'], 'name': tool_call['name'], 'input': {}}}, ensure_ascii=False)}\n\n"
                             
-                            # Handle function arguments - DIRECTLY STREAM DELTA
                             if "arguments" in function_data and tool_call["started"] and function_data["arguments"] is not None:
-                                arg_chunk = function_data["arguments"]
-                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': tool_call['claude_index'], 'delta': {'type': Constants.DELTA_INPUT_JSON, 'partial_json': arg_chunk}}, ensure_ascii=False)}\n\n"
+                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': tool_call['claude_index'], 'delta': {'type': Constants.DELTA_INPUT_JSON, 'partial_json': function_data['arguments']}}, ensure_ascii=False)}\n\n"
 
-                    # Handle finish reason
+                    # 4. Handle Stop/Finish
                     if finish_reason:
-                        if finish_reason == "length":
-                            final_stop_reason = Constants.STOP_MAX_TOKENS
-                        elif finish_reason in ["tool_calls", "function_call"]:
-                            final_stop_reason = Constants.STOP_TOOL_USE
-                        elif finish_reason == "stop":
-                            final_stop_reason = Constants.STOP_END_TURN
-                        else:
-                            final_stop_reason = Constants.STOP_END_TURN
+                        if finish_reason == "length": final_stop_reason = Constants.STOP_MAX_TOKENS
+                        elif finish_reason in ["tool_calls", "function_call"]: final_stop_reason = Constants.STOP_TOOL_USE
+                        else: final_stop_reason = Constants.STOP_END_TURN
                         break
 
     except Exception as e:

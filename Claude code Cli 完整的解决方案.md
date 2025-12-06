@@ -59,6 +59,31 @@ claude-switch model gemini-3-pro-preview-thinking
 
 ---
 
+### 3. 会话管理 (新对话/恢复)
+
+本方案完美兼容 Claude Code 原生命令，**没有区别**：
+
+**开启新对话 (New Session)**
+```bash
+claude
+```
+*(直接输入 `claude` 即可，这会启动一个新的空白对话)*
+
+**恢复上次对话 (Resume Session)**
+```bash
+claude --resume
+```
+*(会显示之前的对话历史列表供选择)*
+
+**在对话中重置 (Reset Context)**
+如果当前对话已经混乱（例如之前的Token爆炸），在对话输入框中直接输入：
+```text
+/reset
+```
+*(这会清空当前上下文记忆，但保持工具权限配置)*
+
+---
+
 ## 🛠 维护与更新指南
 
 ### 更新项目代码
