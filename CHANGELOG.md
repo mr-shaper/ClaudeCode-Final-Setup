@@ -1,6 +1,17 @@
 # Change Log - Claude Code Final Setup
 
-## v2.4.1 (2025-12-05) - "The Clean Slate" (Critical Stability Patch)
+## v2.4.2 (2025-12-05) - "The Sound of Silence" (Models Forbidden)
+
+### 🚀 Fixes & Optimizations
+1.  **Fix "Summary Hallucination" (Zero-Model Short Circuit)**
+    *   **User Constraint**: Strictly forbidden from switching models (even for background tasks).
+    *   **Technical Issue**: Custom Haiku 4.5 model persistently echoed (parroted) instructions instead of summarizing.
+    *   **Solution**: Implemented a **Local Short Circuit** in the Proxy.
+    *   **Mechanism**: The Proxy intercepts requests containing "Summarize this coding conversation", bypasses the LLM entirely, and returns a hardcoded title `"Conversation"`.
+    *   **Result**: 0 Latency, 0 Token Cost, 0 Hallucinations, 0 Model Switches.
+
+---
+
 
 ### 🚀 Fixes & Optimizations
 1.  **Fix "Seasoning" Hang (Post-Tool Freeze)**

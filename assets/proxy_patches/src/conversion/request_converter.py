@@ -40,8 +40,9 @@ def convert_claude_to_openai(
             system_text = "\n\n".join(text_parts)
 
         if system_text.strip():
-            # PROMPT REINFORCEMENT for Haiku 4.5
-            if "claude-haiku-4-5" in openai_model and "Summarize" in system_text:
+            # PROMPT REINFORCEMENT: Ensure Haiku understands the summary task.
+            # We add this reinforcement to the system prompt to prevent "Parroting".
+            if "Summarize" in system_text:
                 system_text += "\n\nCRITICAL: Output ONLY the 5-10 word title. DO NOT REPEAT the conversation history. DO NOT output thoughts. START WITH TITLE DIRECTLY."
             
             openai_messages.append(
