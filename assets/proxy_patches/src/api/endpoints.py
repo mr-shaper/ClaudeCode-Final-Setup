@@ -82,56 +82,6 @@ async def create_message(request: ClaudeMessagesRequest, http_request: Request, 
         
         log_behavior(request_id, "CLAUDE_REQUEST", request.model_dump_json(indent=2))
 
-        # --- ZERO-MODEL SHORT CIRCUIT (Fix Summary Parroting & Config Compatibility) ---
-        # The Custom Haiku model fails to follow system prompts for the internal "Summary" task.
-        # User forbids switching models.
-        # Solution: Intercept the summary request and return a static title locally.
-        # This uses NO model, costs ZERO tokens, and prevents ALL hallucinations.
-        is_summary_task = False
-        if request.messages and len(request.messages) > 0:
-            # Check system prompt in request
-            if request.system:
-                sys_str = ""
-                if isinstance(request.system, str): sys_str = request.system
-                elif isinstance(request.system, list): sys_str = str(request.system)
-                
-                if "Summarize this coding conversation" in sys_str:
-                    is_summary_task = True
-        
-        if is_summary_task:
-            logger.info(f"🛡️ SHORT CIRCUIT: Intercepted Summary Task -> Returning Static Title")
-            static_title = "Conversation"
-            
-            if request.stream:
-                from src.core.constants import Constants
-                async def fake_stream():
-                    yield f"event: {Constants.EVENT_MESSAGE_START}\ndata: {json.dumps({'type': Constants.EVENT_MESSAGE_START, 'message': {'id': f'msg_{uuid.uuid4()}', 'type': 'message', 'role': 'assistant', 'model': request.model, 'content': [], 'stop_reason': None, 'stop_sequence': None, 'usage': {'input_tokens': 0, 'output_tokens': 0}}}, ensure_ascii=False)}\n\n"
-                    yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': 0, 'content_block': {'type': Constants.CONTENT_TEXT, 'text': ''}}, ensure_ascii=False)}\n\n"
-                    
-                    # Yield title text
-                    yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': 0, 'delta': {'type': Constants.DELTA_TEXT, 'text': static_title}}, ensure_ascii=False)}\n\n"
-                    
-                    yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': 0}, ensure_ascii=False)}\n\n"
-                    yield f"event: {Constants.EVENT_MESSAGE_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_MESSAGE_DELTA, 'delta': {'stop_reason': Constants.STOP_END_TURN, 'stop_sequence': None}, 'usage': {'output_tokens': 1}}, ensure_ascii=False)}\n\n"
-                    yield f"event: {Constants.EVENT_MESSAGE_STOP}\ndata: {json.dumps({'type': Constants.EVENT_MESSAGE_STOP}, ensure_ascii=False)}\n\n"
-
-                return StreamingResponse(
-                    fake_stream(),
-                    media_type="text/event-stream",
-                    headers={"Cache-Control": "no-cache"}
-                )
-            else:
-                 return JSONResponse(content={
-                    "id": f"msg_{uuid.uuid4()}",
-                    "type": "message", 
-                    "role": "assistant",
-                    "content": [{"type": "text", "text": static_title}],
-                    "model": request.model,
-                    "stop_reason": "end_turn",
-                    "usage": {"input_tokens": 0, "output_tokens": 1}
-                 })
-        # -------------------------------------------------------------------------------
-
         # Convert Claude request to OpenAI format
         openai_request = convert_claude_to_openai(request, model_manager)
         

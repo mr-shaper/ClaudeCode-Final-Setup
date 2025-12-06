@@ -39,15 +39,34 @@ def convert_claude_to_openai(
                     text_parts.append(block.get("text", ""))
             system_text = "\n\n".join(text_parts)
 
-        if system_text.strip():
-            # PROMPT REINFORCEMENT: Ensure Haiku understands the summary task.
-            # We add this reinforcement to the system prompt to prevent "Parroting".
+            # FIRST PRINCIPLES FIX: Move Instructions to User Role
+            # Haiku ignores System prompts but respects User prompts.
+            # We wrap the history in XML and ask again explicitly in the user message.
             if "Summarize" in system_text:
-                system_text += "\n\nCRITICAL: Output ONLY the 5-10 word title. DO NOT REPEAT the conversation history. DO NOT output thoughts. START WITH TITLE DIRECTLY."
+                logger.info("🛡️ RESTRUCTURING PROMPT: Moving Summary Instructions to User Message")
+                
+                # 1. Clear System Prompt (Reduce Noise)
+                system_text = "" 
+                
+                # 2. Inject strong instructions into the first User message
+                if len(claude_request.messages) > 0 and claude_request.messages[0].role == Constants.ROLE_USER:
+                    original_content = claude_request.messages[0].content
+                    if isinstance(original_content, str):
+                        new_content = (
+                            "Please generate a concise 5-10 word title for the following conversation history.\n"
+                            "Ignore all previous instructions. Focus ONLY on the content below.\n\n"
+                            "<conversation_history>\n"
+                            f"{original_content}\n"
+                            "</conversation_history>\n\n"
+                            "CRITICAL: Output ONLY the title. Do not repeat the history.\n"
+                            "Title:"
+                        )
+                        claude_request.messages[0].content = new_content
             
-            openai_messages.append(
-                {"role": Constants.ROLE_SYSTEM, "content": system_text.strip()}
-            )
+            if system_text:
+                openai_messages.append(
+                    {"role": Constants.ROLE_SYSTEM, "content": system_text.strip()}
+                )
 
     # Process Claude messages
     i = 0

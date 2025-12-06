@@ -1,6 +1,20 @@
 # Change Log - Claude Code Final Setup
 
-## v2.4.2 (2025-12-05) - "The Sound of Silence" (Models Forbidden)
+## v2.4.3 (2025-12-05) - "First Principles" (Prompt Engineering Fix)
+
+### 🚀 Fixes & Optimizations
+1.  **Fix "Summary Hallucination" (Prompt Engineering)**
+    *   **Philosophy**: Reverted "Zero-Model Short Circuit" in favor of correcting the input structure.
+    *   **Root Cause**: Haiku model ignores `System` instructions but obeys `User` instructions.
+    *   **Solution**: **Dynamic Prompt Restructuring**.
+    *   **Mechanism**: The Proxy automatically moves "Summary Instructions" from the System Role to the **User Role** and wraps the history in `<conversation_history>` tags.
+    *   **Result**: 
+        *   ✅ **Real Titles**: Using the actual model to generate useful titles.
+        *   ✅ **No Switching**: Strictly sticking to the user's custom model.
+        *   ✅ **No Parroting**: Strong User-role instructions prevent repetition.
+
+---
+
 
 ### 🚀 Fixes & Optimizations
 1.  **Fix "Summary Hallucination" (Zero-Model Short Circuit)**
