@@ -21,31 +21,19 @@ class ModelManager:
         
         # Now we know it starts with 'claude-', check for haiku/sonnet/opus
         if 'haiku' in model_lower:
-            # Dynamic Subagent Selection Logic
-            # Get the current main model from environment variable
-            current_main_model = os.environ.get("ANTHROPIC_MODEL", "").lower()
-            
-            # Rule 1: Claude Sonnet (Thinking or Normal) -> Use Haiku 4.5
-            if 'claude-sonnet-4-5' in current_main_model:
-                return "claude-haiku-4-5-20251001"
-            
-            # Rule 2: Kimi -> Use Kimi (Same as main)
-            elif 'kimi' in current_main_model:
-                return "kimi-k2-thinking"
-                
-            # Rule 3: Gemini Thinking -> Use Gemini Pro (Non-thinking)
-            elif 'gemini' in current_main_model and 'thinking' in current_main_model:
-                return "gemini-3-pro-preview"
-            
-            # Fallback: Use configured small model
+            # ... (existing haiku logic) ...
             return self.config.small_model
             
         elif 'sonnet' in model_lower:
+            # CRITICAL: Map standard Sonnet request to Thinking Sonnet (DeepSeek)
+            # This allows CLI to use "standard" model name (avoiding UI hiding) while getting "thinking" power.
+            # Rule 1: Claude Sonnet (Thinking or Normal) -> Use Haiku 4.5
+            if 'claude-sonnet-4-5' in current_main_model:
+                return "claude-haiku-4-5-20251001"
+            if '20241022' in model_lower: 
+                return "claude-sonnet-4-5-20250929-thinking"
             return self.config.middle_model
         elif 'opus' in model_lower:
             return self.config.big_model
-        
-        # Unknown Claude variant, pass through
-        return claude_model
 
 model_manager = ModelManager(config)

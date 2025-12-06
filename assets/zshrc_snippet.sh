@@ -22,33 +22,34 @@ claude-switch() {
         unset ANTHROPIC_BASE_URL
         unset OPENAI_API_KEY
         unset OPENAI_BASE_URL
-        unset ANTHROPIC_MODEL
-        unset ANTHROPIC_SMALL_FAST_MODEL
-        unset ANTHROPIC_DEFAULT_HAIKU_MODEL
-        unset SMALL_MODEL
         echo "✅ Switched to Native Claude (Official Account)"
         echo "Run 'claude login' if you haven't logged in."
     elif [[ "$1" == "proxy" ]]; then
         export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
-        export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
+        export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
         export PORT=8000
         export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-        export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
-        export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
-        export ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5-20251001"
-        export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5-20251001"
-        export SMALL_MODEL="claude-haiku-4-5-20251001"
+        export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+        
+        # Ensure model is set to default when switching to proxy
+        if [[ -z "$ANTHROPIC_MODEL" ]]; then
+             export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
+        fi
+        
         echo "🚀 Switched to Custom API Proxy Mode"
         start_claude_proxy
     elif [[ "$1" == "model" ]]; then
+        # Force re-apply Proxy Environment Variables (Safety Net)
+        export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
+        export OPENAI_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+        export PORT=8000
+        export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
+        export ANTHROPIC_API_KEY="sk-EhA5VM1h9Qc02Sv2vI2ByyU99FqXuz0Spw2rgemj7MMfF6GT"
+
         if [[ -n "$2" ]]; then
-            # Force re-apply Proxy Environment Variables (Prevent bypassing proxy)
-            export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
-            export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
-            export PORT=8000
-            export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
-            export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
-            
+            # Strip surrounding quotes if present
+            model_name="${2//\"/}"
+            model_name="${model_name//\'/}"
             export ANTHROPIC_MODEL="$model_name"
             echo "✅ Model switched to: $model_name"
             echo "🔄 Restarting proxy to apply model change..."
@@ -56,6 +57,7 @@ claude-switch() {
         else
             echo "Current model: $ANTHROPIC_MODEL"
             echo "Usage: claude-switch model <model_name>"
+            echo "🔄 Proxy environment variables re-applied."
         fi
     else
         echo "Usage: claude-switch [native|proxy|model]"

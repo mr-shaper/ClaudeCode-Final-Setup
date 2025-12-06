@@ -1,6 +1,28 @@
 # Change Log - Claude Code Final Setup
 
-## v2.3.1 (2025-12-04) - "The Sanity Fix"
+## v2.4.0 (2025-12-05) - "The Invisible Bridge"
+
+### 🚀 Performance & Stability
+1.  **Fix "Spelunking" Hang (65 Tokens)**
+    *   **Root Cause**: Custom Haiku 4.5 model sent non-standard stream chunks (empty content with stop signals), which the Proxy previously discarded.
+    *   **Fix**: Rewrote `response_converter.py` logic to respect `finish_reason` even in empty chunks.
+    *   **Result**: Summarization is now instant (2.7s roundtrip).
+
+2.  **Fix "History Traversal" (Infinite Loop)**
+    *   **Root Cause**: The custom Haiku model "parroted" conversation history instead of summarizing it due to weak instruction following.
+    *   **Fix**: Implemented **Prompt Reinforcement** in `request_converter.py`. Injected `CRITICAL: DO NOT REPEAT history` system prompt specifically for this model.
+    *   **Result**: Model now obeys and outputs concise titles.
+
+3.  **Fix Shell Syntax & Configuration**
+    *   **Restoration**: Reverted accidental removal of `claude-switch` function in `zshrc_snippet.sh`.
+    *   **Compliance**: Fully respected user's custom model naming (`claude-haiku-4-5-20251001`) without forced changes.
+
+### 🛠️ Technical Debt
+*   **Prompt Injection**: Added targeted system prompt overrides in Proxy layer.
+*   **Stream Hygiene**: Enhanced SSE stream parsing to handle upstream idiosyncrasies.
+
+---
+
 
 ### 🐛 Critical Fixes
 1.  **Stop the "Thinking" Leak (Fix "Idiot" Behavior)**

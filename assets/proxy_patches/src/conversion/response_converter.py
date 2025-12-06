@@ -113,6 +113,20 @@ async def convert_openai_streaming_to_claude(
                         choices = chunk.get("choices", [])
                         if not choices:
                             continue
+                        
+                        choice = choices[0]
+                        delta = choice.get("delta") or {}
+                        finish_reason = choice.get("finish_reason")
+
+                        # FILTER EMPTY CHUNKS causing hangs
+                        # Only skip if BOTH delta is empty AND finish_reason is missing
+                        if not delta and not finish_reason:
+                            continue
+                        
+                        # Skip keep-alive chunks with no content ONLY if no finish signal
+                        if not finish_reason and not any(k in delta for k in ["content", "reasoning_content", "tool_calls"]):
+                            continue
+                            
                     except json.JSONDecodeError as e:
                         logger.warning(
                             f"Failed to parse chunk: {chunk_data}, error: {e}"
@@ -169,8 +183,12 @@ async def convert_openai_streaming_to_claude(
 
                     # Handle reasoning/thinking delta (for Kimi/DeepSeek)
                     if delta and "reasoning_content" in delta and delta["reasoning_content"] is not None:
-                         # Treat reasoning strictly as part of the initial text block or a new text block?
-                         # Usually reasoning comes first. If it comes after tool? Unlikely but handle same way.
+                         # CRITICAL FIX: Close tools before thinking too!
+                        for tc_index, tool_call in current_tool_calls.items():
+                            if tool_call["started"]:
+                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
+                                tool_call["started"] = False
+
                         if text_block_closed:
                             text_block_index = max_index_used + 1
                             max_index_used = text_block_index
