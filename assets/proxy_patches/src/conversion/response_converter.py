@@ -125,6 +125,13 @@ async def convert_openai_streaming_to_claude(
 
                     # Handle text delta
                     if delta and "content" in delta and delta["content"] is not None:
+                        # CRITICAL FIX: Close any open tool blocks before starting new text
+                        # This enforces strictly sequential blocks: Text -> Tool -> Text
+                        for tc_index, tool_call in current_tool_calls.items():
+                            if tool_call["started"]:
+                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
+                                tool_call["started"] = False
+
                         # If the previous text block was closed (e.g. by a tool call), we must start a NEW one.
                         if text_block_closed:
                              # Increment index relative to the last tool or text block
@@ -145,6 +152,12 @@ async def convert_openai_streaming_to_claude(
                     
                     # Handle text delta (Answer content)
                     if delta and "content" in delta and delta["content"] is not None:
+                        # Close tools before text
+                        for tc_index, tool_call in current_tool_calls.items():
+                            if tool_call["started"]:
+                                yield f"event: {Constants.EVENT_CONTENT_BLOCK_STOP}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_STOP, 'index': tool_call['claude_index']}, ensure_ascii=False)}\n\n"
+                                tool_call["started"] = False
+
                         if text_block_closed:
                             # We need to restart a text block because we closed the previous one
                             text_block_index = max_index_used + 1

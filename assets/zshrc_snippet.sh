@@ -42,9 +42,13 @@ claude-switch() {
         start_claude_proxy
     elif [[ "$1" == "model" ]]; then
         if [[ -n "$2" ]]; then
-            # Strip surrounding quotes if present
-            model_name="${2//\"/}"
-            model_name="${model_name//\'/}"
+            # Force re-apply Proxy Environment Variables (Prevent bypassing proxy)
+            export OPENAI_BASE_URL="https://ai.opendoor.cn/v1"
+            export OPENAI_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
+            export PORT=8000
+            export ANTHROPIC_BASE_URL="http://127.0.0.1:8000"
+            export ANTHROPIC_API_KEY="sk-YOUR_OPENAI_API_KEY_HERE"
+            
             export ANTHROPIC_MODEL="$model_name"
             echo "✅ Model switched to: $model_name"
             echo "🔄 Restarting proxy to apply model change..."
