@@ -13,7 +13,7 @@ export ANTHROPIC_MODEL="claudecode/claude-sonnet-4-5-20250929-thinking"
 export ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5-20251001"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5-20251001"
 export SMALL_MODEL="claude-haiku-4-5-20251001"
-export BRAVE_API_KEY="YOUR_BRAVE_API_KEY_HERE"
+export BRAVE_API_KEY="BSAyWb51QxF4XrCee2SnYIYH0lnOHYD"
 
 # Function to switch modes and models
 claude-switch() {

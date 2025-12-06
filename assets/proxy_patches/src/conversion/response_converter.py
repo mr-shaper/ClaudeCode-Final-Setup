@@ -98,6 +98,7 @@ async def convert_openai_streaming_to_claude(
     current_tool_calls = {}
     final_stop_reason = Constants.STOP_END_TURN
     text_block_closed = False
+    max_index_used = 0
 
     try:
         async for line in openai_stream:
@@ -124,15 +125,48 @@ async def convert_openai_streaming_to_claude(
 
                     # Handle text delta
                     if delta and "content" in delta and delta["content"] is not None:
+                        # If the previous text block was closed (e.g. by a tool call), we must start a NEW one.
+                        if text_block_closed:
+                             # Increment index relative to the last tool or text block
+                             # We need a robust counter. Let's rely on `tool_block_counter` + initial text(1) + subsequent text blocks.
+                             # Actually, simpler: just increment a global block counter.
+                             # Let's refactor to use `current_block_index`
+                             pass 
+                        
+                        # REFACTORING ON THE FLY TO FIX INDEXING
+                        # We need to ensure we stream to the *current active* text block
+                        if text_block_closed:
+                            # Start a new text block
+                            # Calculate new index: It's 1 (initial) + tools found so far + any extra text blocks (track them)
+                            # To be safe, let's track `max_index_used`.
+                            pass
+
+                    # --- REFACTORED STREAMING LOGIC START ---
+                    
+                    # Handle text delta (Answer content)
+                    if delta and "content" in delta and delta["content"] is not None:
+                        if text_block_closed:
+                            # We need to restart a text block because we closed the previous one
+                            text_block_index = max_index_used + 1
+                            max_index_used = text_block_index
+                            yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': text_block_index, 'content_block': {'type': Constants.CONTENT_TEXT, 'text': ''}}, ensure_ascii=False)}\n\n"
+                            text_block_closed = False
+                        
                         yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': text_block_index, 'delta': {'type': Constants.DELTA_TEXT, 'text': delta['content']}}, ensure_ascii=False)}\n\n"
 
                     # Handle reasoning/thinking delta (for Kimi/DeepSeek)
                     if delta and "reasoning_content" in delta and delta["reasoning_content"] is not None:
-                        # Reasoning/Thinking content enabled
+                         # Treat reasoning strictly as part of the initial text block or a new text block?
+                         # Usually reasoning comes first. If it comes after tool? Unlikely but handle same way.
+                        if text_block_closed:
+                            text_block_index = max_index_used + 1
+                            max_index_used = text_block_index
+                            yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': text_block_index, 'content_block': {'type': Constants.CONTENT_TEXT, 'text': ''}}, ensure_ascii=False)}\n\n"
+                            text_block_closed = False
+
                         yield f"event: {Constants.EVENT_CONTENT_BLOCK_DELTA}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_DELTA, 'index': text_block_index, 'delta': {'type': Constants.DELTA_TEXT, 'text': delta['reasoning_content']}}, ensure_ascii=False)}\n\n"
 
                     # Handle tool call deltas with improved incremental processing
-                    # CRITICAL FIX: Check if tool_calls is not None before iterating
                     if "tool_calls" in delta and delta["tool_calls"] is not None:
                         for tc_delta in delta["tool_calls"]:
                             tc_index = tc_delta.get("index", 0)
@@ -170,7 +204,10 @@ async def convert_openai_streaming_to_claude(
                                     text_block_closed = True
 
                                 tool_block_counter += 1
-                                claude_index = text_block_index + tool_block_counter
+                                # claude_index = text_block_index + tool_block_counter # OLD BUGGY LOGIC
+                                claude_index = max_index_used + 1
+                                max_index_used = claude_index
+                                
                                 tool_call["claude_index"] = claude_index
                                 tool_call["started"] = True
                                 

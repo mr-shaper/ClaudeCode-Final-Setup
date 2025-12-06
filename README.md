@@ -1,13 +1,15 @@
 # Claude Code 本地化/自定义 API 完美解决方案
 ## ✨ Key Features (v2.2.0)
 
-- **Corrected Model Configuration**: Now uses real Claude models (`claude-sonnet-4-5-20250929-thinking`) supported by upstream API instead of defaulting to `gpt-4o`.
-- **Robust Streaming**: Fixed critical crashes ("NoneType" errors) when upstream API returns empty tool call deltas.
-- **Dynamic Subagent Selection**: Automatically pairs the correct subagent model (Haiku/Kimi/Gemini) with your chosen main model to ensure consistent behavior.
-- **OAuth Conflict Resolution**: Automatically manages authentication state to prevent conflicts between official Claude accounts and custom API keys.
-- **Automatic Log Recording**: Full request/response logging to `~/.claude-code-proxy/proxy.log`.
-- **Smart Model Switching**: `claude-switch` command handles model switching, quote stripping, and mode toggling.
-- **Cost-Effective**: Uses custom API endpoints (e.g., Kimi, Gemini) to significantly reduce costs compared to official Anthropic keys.
+### 🌟 核心特性 (Features)
+
+*   **Brain**: 强制开启 `claude-sonnet-4-5-20250929-thinking` 模型，解锁深度思考能力。
+*   **Agentic**: 修复工具调用 (Tool Call) 协议，使其能真正读写文件和执行命令。
+*   **Connected**: 集成 `brave-search`，赋予其实时联网搜索能力。
+*   **Publisher**: 集成 `github` MCP，支持一键发布代码到仓库。
+*   **Reader**: 集成 `puppeteer`，支持无头浏览器阅读网页文档。
+*   **Proxy**: 内置高性能转发代理，拦截并修正 API 格式差异。
+*   **Shell**: 提供 `claude-switch` 快捷指令，无缝切换模式。
 
 ## 📖 这是什么？(What is this?)
 这是一个让你能用 **Kimi、Opendoor 或其他 OpenAI 格式的 API** 来驱动 **Claude Code**（Anthropic 官方强大的编程助手）的完整解决方案。

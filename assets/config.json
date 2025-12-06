@@ -1,7 +1,7 @@
 {
     "mcpServers": {
         "brave-search": {
-            "command": "/Users/mrshaper/.claude/debug_mcp.sh",
+            "command": "/usr/local/bin/node",
             "args": [
                 "/Users/mrshaper/.claude/mcp/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"
             ],
@@ -9,15 +9,8 @@
                 "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
             }
         },
-        "puppeteer": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@modelcontextprotocol/server-puppeteer"
-            ]
-        },
         "github": {
-            "command": "npx",
+            "command": "/usr/local/bin/npx",
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-github"
@@ -25,6 +18,13 @@
             "env": {
                 "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
             }
+        },
+        "puppeteer": {
+            "command": "/usr/local/bin/npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-puppeteer"
+            ]
         }
     }
 }

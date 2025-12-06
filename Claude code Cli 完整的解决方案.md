@@ -16,7 +16,7 @@
 | `PORT` | 本地代理端口 | `8000` |
 
 ---
-
+ claude 请联网查询下现在LA几点以及今天天气下午到晚上每个小时的变化
 ## 🚀 日常操作流程
 
 ### 1. 启动/切换模式
@@ -45,6 +45,10 @@ claude-switch model
 ```bash
 # Claude 4.5 Sonnet (Thinking)
 claude-switch model claudecode/claude-sonnet-4-5-20250929-thinking
+
+
+claude-switch model /claude-sonnet-4-5-20250929-thinking
+
 
 # Kimi k2 (Thinking)
 claude-switch model kimi-k2-thinking
